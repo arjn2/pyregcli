@@ -62,7 +62,7 @@ def menu():
         
         while(ch!=11):
             print("------------------------------------------------\n Current path=",path_trace(),"\n---------------------------------------------------")
-            ch=int(input("\n MENU \n 1.SET_ROOT_LOCATION \n 2.GOTO_ANY_PATH \n 3.MAKE_KEY \n 4.DEFINE_VALUE \n 5.LIST_KEYS \n 6.RESET_PATH  \n 8.pending- LIST_VALUES \n 9.GO_BACK \n 10.EXIT- Enter choice: "))
+            ch=int(input("\n MENU \n 1.SET_ROOT_LOCATION (HKEY_LOCAL_MACHINE,HKEY_CURRENT_USER,..) \n 2.GOTO_ANY_PATH \n 3.CREATE_KEY \n 4.CREATE_VALUE \n 5.LIST_KEYS \n 6.RESET_PATH (FOR DIFFERENT KEYS) \n pending- 8.LIST_VALUES \n 9.GO_BACK \n 10.EXIT- Enter choice: "))
             if(ch==1):
                 rootloc()
             elif(ch==2):
@@ -75,6 +75,8 @@ def menu():
                 lsreg()
             elif(ch==6):
                 reset_path()
+            elif(ch==7):
+                lsval()
             elif(ch==10):
                 clskeys()
                 print("PROGRAM EXITED")
@@ -142,8 +144,7 @@ def cdpath():
     global path_history
     global keyA
 
-    
-    pa=str(input("Enter key name or a full path to open (eg:SOFTWARE or SOFTWARE\\Classes or list the key): "))
+    pa=str(input("Enter registry path or keyname (eg:SOFTWARE or SOFTWARE\\Classes): "))
 
     if(path_history):
         pa=path_history+r"\\"+pa
@@ -175,39 +176,7 @@ def lsreg():
     for i in range(no):
         subkey=wrg.EnumKey(key, i)
         print(subkey)
-    pass
-        
-# #def osaccess(): #get Access
-# #    k=path_trace().replace(pt,sf)
-# #    #print(pt,sf)
-# #    psh_script=f
-#     """
-#     $keyPath = "{k}"  # Replace with your actual registry key path
-#     $user = [System.Security.Principal.WindowsIdentity]::GetCurrent().Name
-#     $rule = New-Object System.Security.AccessControl.RegistryAccessRule ($user, "FullControl", "Allow")
-#     $key = Get-Item $keyPath
-#     $key.SetAccessRule($rule)
-#     """
-
-
-# def osaccess():  # get Access
-# #    k = path_trace().replace(pt, sf)
-# #    psh_script =f
-#     """
-#     $ErrorActionPreference = "Stop"
-#     $keyPath = "{k}"  # Replace with your actual registry key path
-#     $user = [System.Security.Principal.WindowsIdentity]::GetCurrent().Name
-#     $rule = New-Object System.Security.AccessControl.RegistryAccessRule ($user, "FullControl", "Allow")
-#     $key = Get-Item $keyPath
-#     $acl = $key.GetAccessControl()
-#     $acl.SetAccessRule($rule)
-#     $key.SetAccessControl($acl)
-#     """
-#     psh=f"""New-ItemProperty -Path "HKLM:\\SOFTWARE\\HitmanPro\\test2" -Name "goodc" -Value "good evening" -Type String -Force"""
-
-#     subprocess.run(["powershell", "-ExecutionPolicy", "Bypass", "-Command", psh])
-
-
+    
 
 
 def mkvalue():
@@ -270,6 +239,10 @@ def reset_path():
     key=''
 
 def cdback():
+    pass
+
+def lsval():
+    pass
     
 
 def clskeys():
@@ -280,6 +253,9 @@ def clskeys():
                 ck=wrg.CloseKey(i)
             except OSError as e:
                 print("failed to close", i, "error code:", e)
+
+
+
 
 
         
