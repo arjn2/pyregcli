@@ -62,21 +62,25 @@ def menu():
         
         while(ch!=11):
             print("------------------------------------------------\n Current path=",path_trace(),"\n---------------------------------------------------")
-            ch=int(input("\n MENU \n 1.SET_ROOT_LOCATION (HKEY_LOCAL_MACHINE,HKEY_CURRENT_USER,..) \n 2.GOTO_ANY_PATH \n 3.CREATE_KEY \n 4.CREATE_VALUE \n 5.LIST_KEYS \n 6.RESET_PATH (FOR DIFFERENT KEYS) \n pending- 8.LIST_VALUES \n 9.GO_BACK \n 10.EXIT- Enter choice: "))
+            ch=int(input("\n MENU \n 1.READ_REGISTRY_ENTRY \n 2.ADD_REGISTRY_ENTRY \n 3.SET_ROOT_LOCATION (HKEY_LOCAL_MACHINE,HKEY_CURRENT_USER,..) \n 4.GOTO_ANY_PATH \n 5.CREATE_KEY \n 6.CREATE_VALUE \n 7.LIST_KEYS \n 8.LIST_VALUES \n 9.RESET_PATH (FOR DIFFERENT KEYS) \n 10.EXIT- Enter choice: "))
             if(ch==1):
-                rootloc()
+                read_registry_entry()
             elif(ch==2):
-                cdpath()
+                add_registry_entry()
             elif(ch==3):
-                mkkey()
+                rootloc()
             elif(ch==4):
-                mkvalue()
+                cdpath()
             elif(ch==5):
-                lsreg()
+                mkkey()
             elif(ch==6):
-                reset_path()
+                mkvalue()
             elif(ch==7):
+                lskey()
+            elif(ch==8):
                 lsval()
+            elif(ch==9):
+                reset_path()
             elif(ch==10):
                 clskeys()
                 print("PROGRAM EXITED")
@@ -90,6 +94,17 @@ def menu():
 def path_trace():
     full_path=pt+":"+r"\\"+pt2
     return full_path
+
+
+def read_registry_entry():
+    cdpath()
+    lskey()
+    lsval()
+    reset_path()
+
+def add_registry_entry():
+    pass
+    
 
 def rootloc():
     global root
@@ -120,7 +135,7 @@ def rootloc():
                 elif(ch==4):
                     root=wrg.HKEY_USERS
                     pt='HKEY_USERS'
-                    sh='HKU'
+                    sf='HKU'
 
                 elif(ch==5):
                     root=wrg.HKEY_CURRENT_CONFIG
@@ -143,8 +158,23 @@ def cdpath():
     global key
     global path_history
     global keyA
+    global k
+    # if(not key):
+        
+    try:
+        if(key==''):
+            print("\nPlease select a hive before proceeding...")
+            rootloc()
+            print("------------------------------------------------\n Current path=",path_trace(),"\n---------------------------------------------------")
+    except NameError:
+        print("\nPlease select a hive before proceeding...")
+        rootloc()
+        print("------------------------------------------------\n Current path=",path_trace(),"\n---------------------------------------------------")
+  
 
-    pa=str(input("Enter registry path or keyname (eg:SOFTWARE or SOFTWARE\\Classes): "))
+
+    pa=str(input("Enter registry path or keyname (eg:SOFTWARE or SOFTWARE\\\\Classes): "))
+    k=pa
 
     if(path_history):
         pa=path_history+r"\\"+pa
@@ -156,6 +186,8 @@ def cdpath():
             pt2=pa
             path_history=pt2  # update path_history
             #print(f"Successfully opened path: {pa}")
+
+
     except Exception as e:
         
         print("Error", e)
@@ -170,13 +202,82 @@ def mkkey():
     except Exception as e:
         print("Error",e)
         
-def lsreg():
-    no=int(input("Enter no of result to be shown: "))
-    print('--------------------------\nKeys\n-------------------------')
-    for i in range(no):
-        subkey=wrg.EnumKey(key, i)
-        print(subkey)
+def lskey():
+    qn=input("Do you want to show all the keys -y(yes)/n(no)/c(cancel)")
+    if(qn==('y' or 'yes')):
+        print('--------------------------\nKeys\n-------------------------')
+        i=0
+        t=True
+        while t==True:
+            try :
+                    subkey=wrg.EnumKey(key, i)
+                    print(subkey)
+                    i+=1
+            except OSError:
+                t=False
+        print('\n --------------------\nkeys-end\n------------------------------\n')
+
+    elif(qn==('n' or 'no')):
+        no=int(input("Enter no of result to be shown: "))
+        print('--------------------------\nKeys\n-------------------------')
+        try :
+            for i in range(no):
+                subkey=wrg.EnumKey(key, i)
+                print(subkey)
+        except OSError:
+                print('\n --------------------\nkeys-end\n------------------------------\n')
     
+    elif(qn==('c' or 'cancel')):
+        pass
+    
+    else:
+        print("Invalid-Key")
+        lskey()
+    
+def lsval():
+    qn=input("Do you want to show all the values -y(yes)/n(no)/c(cancel)")
+    if(qn==('y' or 'yes')):
+        print('--------------------------\nValues\n-------------------------')
+        i=0
+        t=True
+        while t==True:
+            try :
+                    subkey=wrg.EnumValue(key, i)
+                    print(subkey)
+                    i+=1
+            except OSError:
+                t=False
+        print('\n --------------------\nValues-end\n------------------------------\n')
+
+
+    elif(qn==('n' or 'no')):
+        no=int(input("Enter no of result to be shown: "))
+        print('--------------------------\nValues\n-------------------------')
+        try :
+            for i in range(no):
+                subkey=wrg.EnumValue(key, i)
+                print(subkey)
+        except OSError:
+                print('\n --------------------Values-end------------------------------\n')
+
+    elif(qn==('c' or 'cancel')):
+        pass
+    
+    else:
+        print("Invalid-Key")
+        lsval()
+
+    
+    # no=int(input("Enter no of result to be shown: "))
+    # print('--------------------------\nvalues\n-------------------------')
+    # try:
+    #     for i in range(no):
+    #         subkey=wrg.EnumValue(key, i)
+    #         print(subkey)
+    # except OSError:
+    #     print('\n --------------------values-end------------------------------\n')
+
+
 
 
 def mkvalue():
@@ -239,11 +340,21 @@ def reset_path():
     key=''
 
 def cdback():
-    pass
+    global pt2
+    global path_history
+    bck=path_history-k
+    try:
+        key=wrg.OpenKeyEx(root,bck)
+        if(key):
+            wrg.CloseKey(keyA(len(keyA)-1))
+            path_history=bck # update path_history
+            #print(f"Successfully opened path: {pa}")
 
-def lsval():
-    pass
-    
+
+    except Exception as e:
+        
+        print("Error", e)
+
 
 def clskeys():
     if keyA:
@@ -254,12 +365,6 @@ def clskeys():
             except OSError as e:
                 print("failed to close", i, "error code:", e)
 
-
-
-
-
-        
-            
 
 
 menu() #MAIN_FUNCTION
