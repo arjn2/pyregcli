@@ -60,9 +60,9 @@ def menu():
     ch=0
     try :
         
-        while(ch!=7):
+        while(ch!=11):
             print("------------------------------------------------\n Current path=",path_trace(),"\n---------------------------------------------------")
-            ch=int(input("\n MENU \n 1.SET_ROOT_LOCATION \n 2.GOTO_ANY_PATH \n 3.MAKE_KEY \n 4.DEFINE_VALUE \n 5.LIST_KEYS \n 6.RESET_PATH \n 7.EXIT \n 8.pending- LIST_VALUES \n 9.GO_BACK- Enter choice: "))
+            ch=int(input("\n MENU \n 1.SET_ROOT_LOCATION \n 2.GOTO_ANY_PATH \n 3.MAKE_KEY \n 4.DEFINE_VALUE \n 5.LIST_KEYS \n 6.RESET_PATH  \n 8.pending- LIST_VALUES \n 9.GO_BACK \n 10.EXIT- Enter choice: "))
             if(ch==1):
                 rootloc()
             elif(ch==2):
@@ -75,8 +75,10 @@ def menu():
                 lsreg()
             elif(ch==6):
                 reset_path()
-            elif(ch==7):
+            elif(ch==10):
+                clskeys()
                 print("PROGRAM EXITED")
+                ch=11
             else:
                 print("INVALID KEY")
                 
