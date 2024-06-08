@@ -47,7 +47,7 @@ Ref. official Python documentation or tutorials specific to the winreg module.
 
 
 import winreg as wrg
-
+import subprocess
 
 pt2,pt,path_history,keyA='','','',[]
 
@@ -86,12 +86,13 @@ def menu():
             print("ERROR",e)
         
 def path_trace():
-    full_path=pt+r"\\"+pt2
+    full_path=pt+":"+r"\\"+pt2
     return full_path
 
 def rootloc():
     global root
     global pt
+    global sf
     root=''
     
     ch=0
@@ -102,22 +103,27 @@ def rootloc():
                 if(ch==1):
                     root=wrg.HKEY_CLASSES_ROOT
                     pt='HKEY_CLASSES_ROOT'
+                    sf='HKCR'
+
                 elif(ch==2):
                     root=wrg.HKEY_CURRENT_USER
                     pt='HKEY_CURRENT_USER'
+                    sf='HKCU'
 
                 elif(ch==3):
                     root=wrg.HKEY_LOCAL_MACHINE
                     pt='HKEY_LOCAL_MACHINE'
+                    sf='HKLM'
 
                 elif(ch==4):
                     root=wrg.HKEY_USERS
                     pt='HKEY_USERS'
+                    sh='HKU'
 
                 elif(ch==5):
                     root=wrg.HKEY_CURRENT_CONFIG
                     pt='HKEY_CURRENT_CONFIG'
-
+                    sf='HKCC'
                 elif(ch==6):
                     print("PROGRAM EXITED")
                     root=0
@@ -138,22 +144,17 @@ def cdpath():
 
     
     pa=str(input("Enter key name or a full path to open (eg:SOFTWARE or SOFTWARE\\Classes or list the key): "))
-    if(r'//' not in pa):
-        kn=pa
+
     if(path_history):
         pa=path_history+r"\\"+pa
-        
-    #else:
-    #    path_history=pt2
     
     try:
-        
         key=wrg.OpenKeyEx(root,pa)
         keyA.append(key)
         if(key):
             pt2=pa
-            path_history = pt2  # update path_history
-            print(f"Successfully opened path: {pa}")
+            path_history=pt2  # update path_history
+            #print(f"Successfully opened path: {pa}")
     except Exception as e:
         
         print("Error", e)
@@ -172,34 +173,87 @@ def lsreg():
     no=int(input("Enter no of result to be shown: "))
     print('--------------------------\nKeys\n-------------------------')
     for i in range(no):
-        subkey = wrg.EnumKey(key, i)
+        subkey=wrg.EnumKey(key, i)
         print(subkey)
     pass
         
+# #def osaccess(): #get Access
+# #    k=path_trace().replace(pt,sf)
+# #    #print(pt,sf)
+# #    psh_script=f
+#     """
+#     $keyPath = "{k}"  # Replace with your actual registry key path
+#     $user = [System.Security.Principal.WindowsIdentity]::GetCurrent().Name
+#     $rule = New-Object System.Security.AccessControl.RegistryAccessRule ($user, "FullControl", "Allow")
+#     $key = Get-Item $keyPath
+#     $key.SetAccessRule($rule)
+#     """
+
+
+# def osaccess():  # get Access
+# #    k = path_trace().replace(pt, sf)
+# #    psh_script =f
+#     """
+#     $ErrorActionPreference = "Stop"
+#     $keyPath = "{k}"  # Replace with your actual registry key path
+#     $user = [System.Security.Principal.WindowsIdentity]::GetCurrent().Name
+#     $rule = New-Object System.Security.AccessControl.RegistryAccessRule ($user, "FullControl", "Allow")
+#     $key = Get-Item $keyPath
+#     $acl = $key.GetAccessControl()
+#     $acl.SetAccessRule($rule)
+#     $key.SetAccessControl($acl)
+#     """
+#     psh=f"""New-ItemProperty -Path "HKLM:\\SOFTWARE\\HitmanPro\\test2" -Name "goodc" -Value "good evening" -Type String -Force"""
+
+#     subprocess.run(["powershell", "-ExecutionPolicy", "Bypass", "-Command", psh])
+
+
+
 
 def mkvalue():
-    ch=int(input("Enter type of value: /n 1.STRING /n 2.BINARY /n 3.DWORD-32 /n 4.DWORD-64 /n 5.Multi-String /n 6.Expandable-String /n 7.Symbolic links"))
-    if(ch==1):
-        vt=wrg.REG_SZ
-        val=str(input("Enter String: "))
-    elif(ch==2):
-        vt=wrg.REG_BINARY        
-    elif(ch==3):
-        vt=wrg.REG_DWORD
-    elif(ch==4):
-        vt=wrg.REG_QWORD
-    elif(ch==5):
-        ct=wrg.REG_MULTI_SZ
-    elif(ch==6):
-        ct=wrg.REG_EXPAND_SZ
-    elif(ch==7):
-        ct=wrg.REG_LINK
-    else:
-        print("INVALID KEY")
+    try:
+        # osaccess()
+        ch=int(input("Enter type of value: \n 1.STRING \n 2.BINARY \n 3.DWORD-32 \n 4.DWORD-64 \n 5.Multi-String \n 6.Expandable-String \n Enter choice: "))
+        if(ch==1):
+            # vt=wrg.REG_SZ
+            dt='String'
+            val=str(input("Enter String-value: "))
+        elif ch==2:
+            # vt=wrg.REG_BINARY
+            val=str(input("Enter Binary-value: "))
+            dt='Binary'
+        elif ch==3:
+            # vt=wrg.REG_DWORD
+            val=int(input("Enter DWORD value: "))
+            dt='DWord'
+        elif ch==4:
+            # vt=wrg.REG_QWORD
+            val=int(input("Enter QWORD value: "))
+            dt='QWord'
+        elif ch==5:
+            # vt=wrg.REG_MULTI_SZ
+            val=str(input("Enter Multi-String: ")).split(',')
+            dt='MultiString'
+        elif ch==6:
+            # vt=wrg.REG_EXPAND_SZ
+            val=str(input("Enter Expandable-String: "))
+            dt='ExpandString'
 
-    if(vt):
-        vn=str(input("Enter value-name: "))
-        wrg.SetValueEx("",vn, 0, vt,val)  
+        else:
+            print("INVALID KEY")
+
+        if(val):
+            
+            vn=str(input("Enter name: "))
+            # re=wrg.SetValueEx(key, vn, 0, vt, val)
+            k = path_trace().replace(pt, sf)
+            psh=f"""New-ItemProperty -Path "{k}" -Name "{vn}" -Value "{val}" -Type {dt} -Force"""
+            re=subprocess.run(["powershell", "-ExecutionPolicy", "Bypass", "-Command", psh])
+            if(re):
+                print("Value set successfully!")
+        
+    except Exception as e:
+        print("Error:", e)
 
     
 def reset_path():
@@ -216,7 +270,7 @@ def reset_path():
     key=''
 
 def cdback():
-    pass
+    
 
 def clskeys():
     if keyA:
