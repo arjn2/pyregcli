@@ -1,7 +1,5 @@
 
 
-
-
 import winreg as wrg
 import subprocess
 
@@ -46,6 +44,7 @@ def menu():
                 
     except Exception as e:
             print("ERROR",e)
+            menu()
         
 def path_trace():
     full_path=pt+":"+r"\\"+pt2
@@ -59,7 +58,12 @@ def read_registry_entry():
     reset_path()
 
 def add_registry_entry():
-    pass
+    cdpath()
+    mkkey()
+    mkvalue()
+    reset_path()
+
+    
     
 
 def rootloc():
@@ -115,7 +119,6 @@ def cdpath():
     global path_history
     global keyA
     global k
-    # if(not key):
         
     try:
         if(key==''):
@@ -134,6 +137,8 @@ def cdpath():
 
     if(path_history):
         pa=path_history+r"\\"+pa
+    else:
+        pa=pa
     
     try:
         key=wrg.OpenKeyEx(root,pa)
@@ -141,7 +146,7 @@ def cdpath():
         if(key):
             pt2=pa
             path_history=pt2  # update path_history
-            #print(f"Successfully opened path: {pa}")
+
 
 
     except Exception as e:
@@ -155,10 +160,20 @@ def mkkey():
         nk=wrg.CreateKey(key,keyn)
         if(nk):
             print(f"Successfully created key: {keyn}")
+            try:
+                qn=str(input("Do you want to add another key y(yes)/n(no)"))
+                if(qn=='y'):
+                    mkkey()
+                else:
+                    pass
+            except ValueError:
+                mkkey()
+
     except Exception as e:
         print("Error",e)
         
 def lskey():
+            
     qn=input("Do you want to show all the keys -y(yes)/n(no)/c(cancel)")
     if(qn==('y' or 'yes')):
         print('--------------------------\nKeys\n-------------------------')
@@ -191,6 +206,7 @@ def lskey():
         lskey()
     
 def lsval():
+
     qn=input("Do you want to show all the values -y(yes)/n(no)/c(cancel)")
     if(qn==('y' or 'yes')):
         print('--------------------------\nValues\n-------------------------')
@@ -223,15 +239,6 @@ def lsval():
         print("Invalid-Key")
         lsval()
 
-    
-    # no=int(input("Enter no of result to be shown: "))
-    # print('--------------------------\nvalues\n-------------------------')
-    # try:
-    #     for i in range(no):
-    #         subkey=wrg.EnumValue(key, i)
-    #         print(subkey)
-    # except OSError:
-    #     print('\n --------------------values-end------------------------------\n')
 
 
 
@@ -295,21 +302,20 @@ def reset_path():
     path_history=''
     key=''
 
-def cdback():
-    global pt2
-    global path_history
-    bck=path_history-k
-    try:
-        key=wrg.OpenKeyEx(root,bck)
-        if(key):
-            wrg.CloseKey(keyA(len(keyA)-1))
-            path_history=bck # update path_history
-            #print(f"Successfully opened path: {pa}")
+# def cdback():
+#     global pt2
+#     global path_history
+#     bck=path_history-k
+#     try:
+#         key=wrg.OpenKeyEx(root,bck)
+#         if(key):
+#             wrg.CloseKey(keyA(len(keyA)-1))
+#             path_history=bck # update path_history
 
 
-    except Exception as e:
+    # except Exception as e:
         
-        print("Error", e)
+    #     print("Error", e)
 
 
 def clskeys():
@@ -324,4 +330,3 @@ def clskeys():
 
 
 menu() #MAIN_FUNCTION
-
